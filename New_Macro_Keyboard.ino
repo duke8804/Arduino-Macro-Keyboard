@@ -1,6 +1,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
+
 // Define pins for each button
 const int buttonPin1 = 4;
 const int buttonPin2 = 9;
@@ -44,6 +45,8 @@ void setup() {
 
 void loop() {
   // Handle button states
+  // toggleButton(buttonPin#, lastButtonState#, buttonPin#Active, holdfunction, releasefunction);
+  // pressButton(buttonPin#, lastButtonState#, function);
   toggleButton(buttonPin1, lastButtonState1, buttonPin1Active, holdWKey, releaseWKey);
   pressButton(buttonPin2, lastButtonState2, password1);
   pressButton(buttonPin3, lastButtonState3, password2);
