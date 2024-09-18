@@ -52,6 +52,9 @@ bool lastButtonState11 = HIGH;
 bool buttonPin12Active = false;
 bool lastButtonState12 = HIGH;
 
+unsigned long previousMillis = 0; // To track time for non-blocking delay
+int randomInterval = 0;
+
 void setup() {
   // Initialize button pins as inputs with pullup resistors
   pinMode(buttonPin1, INPUT_PULLUP);
@@ -79,16 +82,16 @@ void loop() {
   // randomPressButton(buttonPin1, lastButtonState1, buttonPin1Active, holdWKey, releaseWKey);
   pressButton(buttonPin1, lastButtonState1, password1);
   pressButton(buttonPin2, lastButtonState2, password2);
-  pressButton(buttonPin3, lastButtonState3, inspire);
+  pressButton(buttonPin3, lastButtonState3, password2);
   toggleButton(buttonPin4, lastButtonState4, buttonPin4Active, holdWKey, releaseWKey);
-  pressButton(buttonPin5, lastButtonState5, microspass);
+  pressButton(buttonPin5, lastButtonState5, password2);
   toggleButton(buttonPin6, lastButtonState6, buttonPin6Active, holdLeftMouseButton, releaseLeftMouseButton);
-  pressButton(buttonPin7, lastButtonState7, microspass);
-  pressButton(buttonPin8, lastButtonState8, microspass);
-  pressButton(buttonPin9, lastButtonState9, microspass);
-  pressButton(buttonPin10, lastButtonState10, microspass);
-  pressButton(buttonPin11, lastButtonState11, microspass);
-  pressButton(buttonPin12, lastButtonState12, microspass);
+  pressButton(buttonPin7, lastButtonState7, password2);
+  pressButton(buttonPin8, lastButtonState8, password2);
+  pressButton(buttonPin9, lastButtonState9, password2);
+  pressButton(buttonPin10, lastButtonState10, password2);
+  pressButton(buttonPin11, lastButtonState11, password2);
+  randomPressButton(buttonPin12, lastButtonState12, buttonPin12Active, holdLeftMouseButton, releaseLeftMouseButton);
 
   // A small delay to avoid bouncing issues
   delay(10);
@@ -103,20 +106,32 @@ void randomPressButton(int buttonPin, bool &lastButtonState, bool &actionActive,
     // Toggle the action's active state
     actionActive = !actionActive;
 
-    // If the action is activated, enter the loop
+    // If the action is activated, set the random interval
     if (actionActive) {
-      while (actionActive) {
-        pressAction();  // Call the press action function
-        delay(random(200, 351));  // Wait for a random interval between 200 and 350 milliseconds
-        releaseAction();  // Call the release action function
-        delay(random(200, 351));  // Wait for a random interval between 200 and 350 milliseconds
+      randomInterval = random(100, 351); // Set initial random interval
+      previousMillis = millis();         // Initialize timing
+    } else {
+      releaseAction();  // Ensure release action is called when deactivated
+    }
+  }
 
-        // Check the button state again to exit if needed
-        buttonState = digitalRead(buttonPin);
-        if (buttonState == LOW && lastButtonState == HIGH) {
-          actionActive = false;
-        }
+  // If the action is active, perform the press and release actions at random intervals
+  if (actionActive) {
+    unsigned long currentMillis = millis();
+
+    if (currentMillis - previousMillis >= randomInterval) {
+      // Alternate between press and release actions
+      static bool isPressed = false;
+      if (isPressed) {
+        releaseAction();
+      } else {
+        pressAction();
       }
+      isPressed = !isPressed;
+
+      // Set the next random interval and reset the timer
+      randomInterval = random(200, 351);
+      previousMillis = currentMillis;
     }
   }
 
